@@ -59,18 +59,21 @@ def Make_Image(T, S, Dark_strength, Bias_strength, LightPollutionStrength):
     g = 1/(sigma*np.sqrt(2*np.pi))*np.exp(-1/2*(x-mu)**2/sigma**2)
     gg = np.outer(g,g)
     Star = S*T*gg
-    Source_noise = np.random.normal(size = (L,L), loc = 0, scale = Star**0.5) # Noise N ~ S**0.5
+    #Source_noise = np.random.normal(size = (L,L), loc = 0, scale = Star**0.5) # Noise N ~ S**0.5
+    Source_noise = np.random.poisson(size = (L,L), lam = Star**0.5) # Noise N ~ S**0.5
     
     # Dark
     Dark = np.ones((L,L))*Dark_strength*T
-    Dark_noise = np.random.normal(loc = 0, size = (L,L), scale = Dark**0.5)
+    #Dark_noise = np.random.normal(loc = 0, size = (L,L), scale = Dark**0.5)
+    Dark_noise = np.random.poisson(size = (L,L), lam = Dark**0.5)
     
     # Bias (No pattern for now)
     Bias = np.ones((L,L))*Bias_strength
     
     # Assuming uniform sky background, actually not only light pollution, but... whatever.
     LightPollution = np.ones((L,L))*LightPollutionStrength*T
-    LP_noise = np.random.normal(loc = 0, size = (L,L), scale = LightPollution**0.5)
+    #LP_noise = np.random.normal(loc = 0, size = (L,L), scale = LightPollution**0.5)
+    LP_noise = np.random.poisson(size = (L,L), lam = LightPollution**0.5)
     
     # Add all the frames
     D += (Star + Source_noise + Dark + Dark_noise + Bias + LightPollution + LP_noise)
@@ -79,7 +82,8 @@ def Make_Image(T, S, Dark_strength, Bias_strength, LightPollutionStrength):
 # Measure SNR
 def Photometry(D):
     SourceCount = np.sum(D[mask1])-np.mean(D[ring])*np.sum(mask1)
-    Noise = np.std(D[ring])
+    #Noise = np.std(D[ring])*np.sum(mask1)**0.5
+    Noise = np.sqrt(np.sum(D[mask1])) + np.std(D[ring])/np.sum(D[ring])*np.sum(D[mask1])
     SNR = SourceCount / Noise
     return SNR
 
