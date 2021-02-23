@@ -1,7 +1,6 @@
 import numpy as np
 from matplotlib.pyplot import axes, figure, colorbar, show 
 from matplotlib.widgets import Slider, Button
-from photutils import CircularAnnulus, CircularAperture, aperture_photometry
 from matplotlib.patches import Circle
 
 # The parameters
