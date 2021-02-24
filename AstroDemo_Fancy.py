@@ -2,6 +2,8 @@ import numpy as np
 from matplotlib.pyplot import axes, figure, colorbar, show 
 from matplotlib.widgets import Slider, Button
 from matplotlib.patches import Circle
+from astropy.modeling.functional_models import AiryDisk2D
+from scipy.special import jv
 
 # The parameters
 T0 = 50 # Exposure time
@@ -54,12 +56,14 @@ def Make_Image(T, S, Dark_strength, Bias_strength, SkyStrength):
     mu = int(L/2) # The center of the star
     
     # Source
-    # Assuming a simple 2D guassian array for PSF
-    x = np.linspace(0,L,L)
-    g = 1/(sigma*np.sqrt(2*np.pi))*np.exp(-1/2*(x-mu)**2/sigma**2)
-    gg = np.outer(g,g)
-    Star = S*T*gg
-    Source_noise = np.random.poisson(size = (L,L), lam = Star**0.5) # Noise N ~ S**0.5
+    #AD = AiryDisk2D(1, int(L/2), int(L/2), sigma)
+    Rz = 1.2196698912665045 
+    x = np.arange(0, L)
+    k = np.pi*np.sqrt((x-int(L/2))**2)/(sigma*2/Rz)
+    AD = (2*jv(0,k)/k)**2
+    AD = np.outer(AD, AD)
+    Star = S*T*AD
+    Source_noise = 0#np.random.poisson(size = (L,L), lam = Star**0.5) # Noise N ~ S**0.5
     
     # Dark
     Dark = np.ones((L,L))*Dark_strength*T
