@@ -8,7 +8,7 @@ from astropy.convolution import convolve, AiryDisk2DKernel
 # The parameters
 T0 = 50 # Exposure time
 S0 = 2e2 # The brightness of the source (count/time)
-sigma = 2.0 #The FWHM of the source (pixel)
+sigma = 5.0 #The FWHM of the source (pixel)
 Dark_strength0 = 10 # Dark current intensity (count/time/pixed)
 Bias_strength0 = 1 # Bias #
 SkyStrength0 = 10 # SkyStrength background
@@ -58,7 +58,7 @@ def Make_Image(T, S, Dark_strength, Bias_strength, SkyStrength):
     # Source
     point = np.zeros((L,L))
     point[int(L/2),int(L/2)] = S*T
-    AD = AiryDisk2DKernel(radius=2*sigma, x_size=L, y_size=L)
+    AD = AiryDisk2DKernel(radius=2*sigma)
     Star = convolve(point, AD)
     Source_noise = np.random.poisson(size = (L,L), lam = Star**0.5) # Noise N ~ S**0.5
     
