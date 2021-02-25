@@ -2,8 +2,8 @@ import numpy as np
 from matplotlib.pyplot import axes, figure, colorbar, show 
 from matplotlib.widgets import Slider, Button
 from matplotlib.patches import Circle
-from astropy.modeling.functional_models import AiryDisk2D
-from scipy.special import jv
+from astropy.convolution import convolve, AiryDisk2DKernel
+#from scipy.special import jv
 
 # The parameters
 T0 = 50 # Exposure time
@@ -56,14 +56,11 @@ def Make_Image(T, S, Dark_strength, Bias_strength, SkyStrength):
     mu = int(L/2) # The center of the star
     
     # Source
-    #AD = AiryDisk2D(1, int(L/2), int(L/2), sigma)
-    Rz = 1.2196698912665045 
-    x = np.arange(0, L)
-    k = np.pi*np.sqrt((x-int(L/2))**2)/(sigma*2/Rz)
-    AD = (2*jv(0,k)/k)**2
-    AD = np.outer(AD, AD)
-    Star = S*T*AD
-    Source_noise = 0#np.random.poisson(size = (L,L), lam = Star**0.5) # Noise N ~ S**0.5
+    point = np.zeros((L,L))
+    point[int(L/2),int(L/2)] = S*T
+    AD = AiryDisk2DKernel(radius=2*sigma, x_size=L, y_size=L)
+    Star = convolve(point, AD)
+    Source_noise = np.random.poisson(size = (L,L), lam = Star**0.5) # Noise N ~ S**0.5
     
     # Dark
     Dark = np.ones((L,L))*Dark_strength*T
