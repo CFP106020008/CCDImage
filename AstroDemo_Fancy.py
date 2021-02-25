@@ -16,7 +16,7 @@ VMAX0 = 1500 # Display colorbar maxium
 VMIN0 = 1000 # Display colorbar maxium
 L = 101 # Size of the image 
 Show_Cir = True # Show the aperture that do photometry
-r1, r2, r3 = 5, 10, 20 # The size of the aperture
+r1, r2, r3 = 2*sigma, 4*sigma, 8*sigma # The size of the aperture
 
 #=========================#
 
@@ -36,14 +36,14 @@ showCirax = axes([0.8, 0.15, 0.125, 0.06])
 
 sT   = Slider(axT , 'Exposure Time',   0, 100, valinit=T0)
 sS   = Slider(axS , 'Source',          0, 2e3, valinit=S0)
-sSKY = Slider(axSKY, 'Sky',             0, 100, valinit=SkyStrength0)
+sSKY = Slider(axSKY, 'Sky',            0, 100, valinit=SkyStrength0)
 sD   = Slider(axD,  'Dark',            0, 100, valinit=Dark_strength0)
 sVMAX= Slider(axVMAX, 'VMAX',          0, 2e4, valinit=VMAX0)
 sVMIN= Slider(axVMIN, 'VMIN',          0, 2e4, valinit=VMIN0)
 
 x = np.arange(0, L)
 y = np.arange(0, L)
-cx, cy = int(L/2), int(L/2)
+cx, cy = L/2, L/2
 mask1 = (x[np.newaxis,:]-cx)**2 + (y[:,np.newaxis]-cy)**2 < r1**2
 mask2 = (x[np.newaxis,:]-cx)**2 + (y[:,np.newaxis]-cy)**2 > r2**2
 mask3 = (x[np.newaxis,:]-cx)**2 + (y[:,np.newaxis]-cy)**2 < r3**2
@@ -80,11 +80,7 @@ def Make_Image(T, S, Dark_strength, Bias_strength, SkyStrength):
 # Measure SNR
 def Photometry(D):
     SourceCount = np.sum(D[mask1])-np.mean(D[ring])*np.sum(mask1)
-    Noise  = np.sqrt(np.sum(D[mask1]) + np.sum(mask1)**2/np.sum(ring)**2*np.sum(D[ring]))
-    #Noise1 = np.sqrt(np.sum(D[mask1]) + np.sum(mask1)**2/np.sum(ring)**2*np.var(D[ring]))
-    #print(Noise)
-    #print(Noise1)
-    #print(Noise2)
+    Noise  = np.sqrt(np.sum(D[mask1]) + np.sum(mask1)**2/np.sum(ring)**2*np.std(D[ring]))
     SNR = SourceCount / Noise
     return SNR
 
